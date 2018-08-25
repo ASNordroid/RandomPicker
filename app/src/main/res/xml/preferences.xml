@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:disableDependentsState="false"
+        android:key="joke"
+        android:summary="Отправлять все картинки куратору в ФСБ?"
+        android:title="Статистика" />
+    <EditTextPreference
+        android:key="numberOfPics"
+        android:summary="Не рекомендуется указывать значение больше 100."
+        android:title="Количество картинок"
+        android:defaultValue="10" />
+    <com.example.ant.randomrei.TimePreference
+        android:dialogTitle=""
+        android:key="timepicker"
+        android:negativeButtonText="Cancel"
+        android:positiveButtonText="OK"
+        android:title="Время обновления"
+        tools:context=".MainActivity" />
+</PreferenceScreen>
