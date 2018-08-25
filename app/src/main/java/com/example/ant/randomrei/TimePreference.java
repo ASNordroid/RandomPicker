@@ -56,8 +56,9 @@ public class TimePreference extends DialogPreference {//implements Preference.On
         super.onDialogClosed(positiveResult);
 
         if (positiveResult) {
-            sp.edit().putInt("UPDATEHOUR", picker.getCurrentHour()).commit();
-            sp.edit().putInt("UPDATEMINUTE", picker.getCurrentMinute()).commit();
+            sp.edit().putInt("UPDATEHOUR", picker.getCurrentHour()).apply();
+            sp.edit().putInt("UPDATEMINUTE", picker.getCurrentMinute()).apply();
+            callChangeListener(picker);
         }
     }
 
@@ -66,7 +67,7 @@ public class TimePreference extends DialogPreference {//implements Preference.On
 //        final Date date = new Date(time);
 //        setSummary(dateFormat.format(date.getTime()));
 //    }
-//
+
 //    @Override
 //    public boolean onPreferenceChange(final Preference preference, final Object newValue) {
 //        Preference pref = findPreference("timepicker");

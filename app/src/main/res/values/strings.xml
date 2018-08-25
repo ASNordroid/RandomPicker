@@ -9,6 +9,7 @@
     <string name="title_activity_history">History</string>
     <string name="nofolder">No folder is chosen</string>
     <string name="nohistory">No history for this day</string>
+    <string name="nofavorites">No favorites</string>
     <string name="about">Created by DevXorNet.</string>
 
 </resources>

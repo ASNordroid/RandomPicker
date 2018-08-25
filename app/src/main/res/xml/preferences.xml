@@ -2,21 +2,21 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <CheckBoxPreference
-        android:defaultValue="true"
-        android:disableDependentsState="false"
         android:key="joke"
+        android:title="Статистика"
         android:summary="Отправлять все картинки куратору в ФСБ?"
-        android:title="Статистика" />
+        android:defaultValue="true"
+        android:disableDependentsState="false" />
     <EditTextPreference
         android:key="numberOfPics"
-        android:summary="Не рекомендуется указывать значение больше 100."
         android:title="Количество картинок"
+        android:summary="Не рекомендуется указывать значение больше 100."
         android:defaultValue="10" />
     <com.example.ant.randomrei.TimePreference
-        android:dialogTitle=""
         android:key="timepicker"
+        android:title="Время обновления"
+        android:dialogTitle=""
         android:negativeButtonText="Cancel"
         android:positiveButtonText="OK"
-        android:title="Время обновления"
-        tools:context=".MainActivity" />
+        tools:context=".MyPreferenceActivity" />
 </PreferenceScreen>
