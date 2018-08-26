@@ -27,56 +27,62 @@ public class HistoryActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         SharedPreferences sp = getSharedPreferences("MyPref", MODE_PRIVATE);
-        int monthToFind = sp.getInt("MONTHTOFIND", 1);
-        int dayToFind   = sp.getInt("DAYTOFIND", 1);
+        int monthToFind = getIntent().getIntExtra("MONTHTOFIND", 1);
+        int dayToFind   = getIntent().getIntExtra("DAYTOFIND",1);
+
+//        Log.i("mylog_hist0", Integer.toString(monthToFind) + "  " + Integer.toString(dayToFind));
 
         ArrayList<String> pictures = new ArrayList<>();
-        String history = sp.getString("HISTORY", null);
+        String history = sp.getString("HISTORY", "[]");
 
-//        if (history == null) {
-//            Toast.makeText(HistoryActivity.this, "No history at all.",
-//                    Toast.LENGTH_LONG).show();
-//            finish();
-//        }
-
+//        try {
         try {
-            try {
-                JSONArray historyArray = new JSONArray(history);
+            JSONArray historyArray = new JSONArray(history);
+            boolean found = false;
 
-                for (int i = 0; i < historyArray.length(); i++) {
-                    JSONObject day = historyArray.getJSONObject(i);
+            for (int i = 0; i < historyArray.length(); i++) {
+                JSONObject day = historyArray.getJSONObject(i);
 
-                    Log.i("mylog_hist", day.getString("pictures"));
+//                    Log.i("mylog_hist2", Integer.toString(day.getInt("day"))
+//                    + "---" + Integer.toString(day.getInt("month")));
+//                    Log.i("mylog_hist2", day.getString("pictures"));
 
-                    if (day.getInt("day") == dayToFind &&
-                            day.getInt("month") == monthToFind) {
+                if (day.getInt("day") == dayToFind &&
+                        day.getInt("month") == monthToFind) {
+                    found = true;
+//                        Log.i("mylog_hist3", "Day found.");
 
-                        Log.i("mylog_hist", "Day found.");
-
-                        for (int j = 0; j < day.getJSONArray("pictures").length(); j++) {
-                            pictures.add(day.getJSONArray("pictures").getString(j));
-                            Log.i("mylog_hist", day.getJSONArray("pictures").getString(j));
-                        }
+                    for (int j = 0; j < day.getJSONArray("pictures").length(); j++) {
+                        pictures.add(day.getJSONArray("pictures").getString(j));
+//                            Log.i("mylog_hist4", day.getJSONArray("pictures").getString(j));
                     }
                 }
-                Log.i("mylog_hist", "hi" + TextUtils.join(", ", pictures));
-
+            }
+//                Log.i("mylog_hist1", TextUtils.join(", ", pictures));
+            if (found) {
                 ListView history_list = (ListView) findViewById(R.id.list);
-                history_list.setEmptyView(findViewById(R.id.myempty));
                 DataAdapter adapter = new DataAdapter(this, pictures.toArray(new String[0]));
                 history_list.setAdapter(adapter);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            } else {
+                ListView history_list = (ListView) findViewById(R.id.list);
+                TextView tv = (TextView) findViewById(R.id.myempty);
+                tv.setText(R.string.nohistory);
+                history_list.setEmptyView(tv);
+                DataAdapter adapter = new DataAdapter(this, new String[0]);
+                history_list.setAdapter(adapter);
             }
-        } catch (NullPointerException g) {
-            g.getLocalizedMessage();
-
-            ListView history_list = (ListView) findViewById(R.id.list);
-            TextView tv = (TextView) findViewById(R.id.myempty);
-            tv.setText("No history for this day");
-            history_list.setEmptyView(tv);
-            DataAdapter adapter = new DataAdapter(this, new String[0]);
-            history_list.setAdapter(adapter);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+//        } catch (NullPointerException g) {
+//            g.getLocalizedMessage();
+//
+//            ListView history_list = (ListView) findViewById(R.id.list);
+//            TextView tv = (TextView) findViewById(R.id.myempty);
+//            tv.setText(R.string.nohistory);
+//            history_list.setEmptyView(tv);
+//            DataAdapter adapter = new DataAdapter(this, new String[0]);
+//            history_list.setAdapter(adapter);
+//        }
     }
 }

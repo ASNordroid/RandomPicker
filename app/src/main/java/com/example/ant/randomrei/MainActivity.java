@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             ListView list = (ListView) findViewById(R.id.list);
             TextView tv = (TextView) findViewById(R.id.myempty);
-            tv.setText("No folder is chosen");
+            tv.setText(R.string.nofolder);
             list.setEmptyView(tv);
             DataAdapter adapter = new DataAdapter(this, new String[0]);
             list.setAdapter(adapter);
@@ -116,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId())
         {
             case R.id.favorite:
-//                Intent favoritesIntent = new Intent(MainActivity.this,
-//                        FavoriteActivity.class);
                 startActivity(new Intent(MainActivity.this,
                         FavoriteActivity.class));
                 return true;
@@ -158,10 +156,10 @@ public class MainActivity extends AppCompatActivity {
                 DatePickerDialog dpd = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        sp.edit().putInt("MONTHTOFIND", monthOfYear + 1).apply();
-                        sp.edit().putInt("DAYTOFIND", dayOfMonth).apply();
                         Intent historyIntent = new Intent(MainActivity.this,
                                 HistoryActivity.class);
+                        historyIntent.putExtra("MONTHTOFIND", monthOfYear + 1);
+                        historyIntent.putExtra("DAYTOFIND", dayOfMonth);
                         startActivity(historyIntent);
                     }
                 }, year, month, day);
@@ -270,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
         String oldPicturesString = sp.getString("HISTORY", null); // null ???
         try {
             todayJsonArray = new JSONArray(oldPicturesString);
-        } catch (JSONException | NullPointerException e) { //beter catch
+        } catch (JSONException | NullPointerException e) { //better catch
             e.printStackTrace();
             todayJsonArray = new JSONArray();
         }
@@ -315,12 +313,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                            int pos, long id) {
-                String favorites = sp.getString("FAVORITES", "")
-                        .concat(picsToShow[pos]).concat(" "); // change to path agnostic
-                sp.edit().putString("FAVORITES", favorites).apply();
+                try {
+                    JSONArray favorites = new JSONArray(sp.getString("FAVORITES", "[]"));
+                    favorites.put(picsToShow[pos]);
+                    sp.edit().putString("FAVORITES", favorites.toString()).apply();
 
-                Toast.makeText(MainActivity.this, picsToShow[pos]
-                        .concat(" was added to favorites."), Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, picsToShow[pos]
+                            .concat(" was added to favorites."), Toast.LENGTH_LONG).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
                 return true;
             }
