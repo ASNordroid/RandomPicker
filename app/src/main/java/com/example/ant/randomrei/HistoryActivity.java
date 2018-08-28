@@ -43,18 +43,18 @@ public class HistoryActivity extends AppCompatActivity {
             for (int i = 0; i < historyArray.length(); i++) {
                 JSONObject day = historyArray.getJSONObject(i);
 
-//                    Log.i("mylog_hist2", Integer.toString(day.getInt("day"))
-//                    + "---" + Integer.toString(day.getInt("month")));
-//                    Log.i("mylog_hist2", day.getString("pictures"));
+                    Log.i("mylog_hist2", Integer.toString(day.getInt("day"))
+                    + "---" + Integer.toString(day.getInt("month")));
+                    Log.i("mylog_hist2", day.getString("pictures"));
 
                 if (day.getInt("day") == dayToFind &&
                         day.getInt("month") == monthToFind) {
                     found = true;
-//                        Log.i("mylog_hist3", "Day found.");
+                        Log.i("mylog_hist3", "Day found.");
 
                     for (int j = 0; j < day.getJSONArray("pictures").length(); j++) {
                         pictures.add(day.getJSONArray("pictures").getString(j));
-//                            Log.i("mylog_hist4", day.getJSONArray("pictures").getString(j));
+                            Log.i("mylog_hist4", day.getJSONArray("pictures").getString(j));
                     }
                 }
             }

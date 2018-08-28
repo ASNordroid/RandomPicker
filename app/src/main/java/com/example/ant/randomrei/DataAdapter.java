@@ -41,10 +41,6 @@ public class DataAdapter extends ArrayAdapter<String> {
 
         Picasso
                 .get()
-                .setLoggingEnabled(true);
-
-        Picasso
-                .get()
                 .load(new File(mData[position]))
                 .fit()
                 .centerInside()
