@@ -21,7 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -46,14 +45,13 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     SharedPreferences sp;
-    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -102,24 +100,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.main_menu, menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater menuInflater = getMenuInflater();
+        getMenuInflater().inflate(R.menu.main_menu, menu);
 
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId())
         {
-            case R.id.favorite:
+            case R.id.action_favorites:
                 startActivity(new Intent(MainActivity.this,
                         FavoriteActivity.class));
                 return true;
-            case R.id.history:
+            case R.id.action_history:
                 // workaround for crash on some SAMSUNG devices
                 Context context = new ContextWrapper(this) {
                     private Resources wrappedResources;
@@ -148,24 +144,24 @@ public class MainActivity extends AppCompatActivity {
                 };
                 //----------------------------------------------------------------------------------
 
-                final Calendar today = Calendar.getInstance();
-                int year  = today.get(Calendar.YEAR);
-                int month = today.get(Calendar.MONTH);
-                int day   = today.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog dpd = new DatePickerDialog(context, new DatePickerDialog.OnDateSetListener() {
+                Calendar today = Calendar.getInstance();
+                DatePickerDialog dpd = new DatePickerDialog(context,
+                        new DatePickerDialog.OnDateSetListener() {
                     @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    public void onDateSet(DatePicker view, int year, int month, int day) {
                         Intent historyIntent = new Intent(MainActivity.this,
                                 HistoryActivity.class);
-                        historyIntent.putExtra("MONTHTOFIND", monthOfYear + 1);
-                        historyIntent.putExtra("DAYTOFIND", dayOfMonth);
+                        historyIntent.putExtra("MONTHTOFIND", month + 1);
+                        historyIntent.putExtra("DAYTOFIND", day);
                         startActivity(historyIntent);
                     }
-                }, year, month, day);
+                }, today.get(Calendar.YEAR),
+                   today.get(Calendar.MONTH),
+                   today.get(Calendar.DAY_OF_MONTH));
+
                 dpd.show();
                 return true;
-            case R.id.myfolderpicker:
+            case R.id.action_folderpicker:
                 if (Build.VERSION.SDK_INT >= 23 && !storagePermissionAvailable()) {
                     ActivityCompat.requestPermissions(MainActivity.this,
                             new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -181,12 +177,10 @@ public class MainActivity extends AppCompatActivity {
                 updateContentInView();
                 return true;
             case R.id.action_settings:
-//                Intent settingsIntent = new Intent(MainActivity.this,
-//                        MyPreferenceActivity.class);
                 startActivity(new Intent(MainActivity.this,
                         MyPreferenceActivity.class));
                 return true;
-            case R.id.about:
+            case R.id.action_about:
                 Toast.makeText(MainActivity.this,
                         R.string.about, Toast.LENGTH_SHORT).show();
                 return true;
@@ -197,8 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
     //change to exit on double press back ???
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         new AlertDialog.Builder(this)
                 .setTitle("Exit")
                 .setMessage("Are you sure?")
@@ -233,7 +226,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         switch (requestCode) {
             case 111:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -253,33 +247,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveTodaySet(String[] pictures) {
-        Calendar curTime = Calendar.getInstance();
-        JSONObject today = new JSONObject();
+        Calendar today = Calendar.getInstance();
+        JSONObject todayJO = new JSONObject();
 
         try {
-            today.put("month", curTime.get(Calendar.MONTH) + 1);
-            today.put("day", curTime.get(Calendar.DAY_OF_MONTH));
-            today.put("pictures", new JSONArray(pictures));
+            todayJO.put("day", today.get(Calendar.DAY_OF_MONTH));
+            todayJO.put("month", today.get(Calendar.MONTH) + 1);
+            todayJO.put("pictures", new JSONArray(pictures));
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        JSONArray todayJsonArray;
-        String oldPicturesString = sp.getString("HISTORY", null); // null ???
+        JSONArray todayJA;
+        String oldPicturesString = sp.getString("HISTORY", "[]"); // null ???
         try {
-            todayJsonArray = new JSONArray(oldPicturesString);
+            todayJA = new JSONArray(oldPicturesString);
         } catch (JSONException | NullPointerException e) { //better catch
             e.printStackTrace();
-            todayJsonArray = new JSONArray();
+            todayJA = new JSONArray();
         }
-        todayJsonArray.put(today);
-        Log.i("mylog_main", todayJsonArray.toString());
+        todayJA.put(todayJO);
+        Log.i("mylog_main", todayJA.toString());
 
-        sp.edit().putString("HISTORY", todayJsonArray.toString()).apply();
+        sp.edit().putString("HISTORY", todayJA.toString()).apply();
     }
 
-    private void updateContentInView()
-    {
+    private void updateContentInView() {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(System.currentTimeMillis());
         cal.set(Calendar.HOUR, sp.getInt("UPDATEHOUR",19));
@@ -304,11 +297,12 @@ public class MainActivity extends AppCompatActivity {
         showList(picsToShow);
     }
 
-    private void showList(final String[] picsToShow){
+    private void showList(final String[] picsToShow) {
         ListView list = (ListView) findViewById(R.id.list);
         list.setEmptyView(findViewById(R.id.myempty));
         DataAdapter adapter = new DataAdapter(this, picsToShow);
         list.setAdapter(adapter);
+
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
@@ -330,29 +324,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String[] getNewPics(int numberOfPics) {
-        List<String> allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET",null));
-        long seed = System.nanoTime();
-        Collections.shuffle(allImagesList, new Random(seed));
-
-        Log.i("mylog_main", Integer.toString(allImagesList.size()));
-
-        if (allImagesList.size() < numberOfPics) {
-            setNewRandomListFromFolder();
-            allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET",null));
-        }
-
-        String[] imageIds = new String[numberOfPics];
         try {
-            for (int i = 0; i < numberOfPics; ++i) {
-                imageIds[i] = (allImagesList.remove(allImagesList.size() - 1));
+            List<String> allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET", null));
+            long seed = System.nanoTime();
+            Collections.shuffle(allImagesList, new Random(seed));
+
+            Log.i("mylog_main", Integer.toString(allImagesList.size()));
+
+            if (allImagesList.size() < numberOfPics) {
+                setNewRandomListFromFolder();
+                allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET", null));
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.getLocalizedMessage();
+
+            String[] imageIds = new String[numberOfPics];
+            try {
+                for (int i = 0; i < numberOfPics; ++i) {
+                    imageIds[i] = (allImagesList.remove(allImagesList.size() - 1));
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                e.getLocalizedMessage();
+            }
+
+            sp.edit().putStringSet("ALLIMAGESSET", new HashSet<>(allImagesList)).apply();
+
+            return imageIds;
+        } catch (NullPointerException g) {
+            g.printStackTrace();
+            return new String[0];
         }
-
-        sp.edit().putStringSet("ALLIMAGESSET", new HashSet<>(allImagesList)).apply();
-
-        return imageIds;
     }
 
     private void setNewRandomListFromFolder() {

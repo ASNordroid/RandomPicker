@@ -25,10 +25,10 @@
             android:label="@string/action_settings" />
         <activity
             android:name=".FavoriteActivity"
-            android:label="@string/action_favorite" />
+            android:label="@string/action_favorites" />
         <activity
             android:name=".HistoryActivity"
-            android:label="@string/title_activity_history" />
+            android:label="@string/action_history" />
     </application>
 
 </manifest>
