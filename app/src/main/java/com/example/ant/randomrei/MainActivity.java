@@ -10,9 +10,11 @@ import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.Manifest;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -44,6 +46,8 @@ import java.util.Objects;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    ListView list;
+    Parcelable state;
     SharedPreferences sp;
 
     @Override
@@ -61,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         Log.i("mylog_main_onStart", Integer.toString(sp.getInt("UPDATEHOUR", 19))
-        + " " + Integer.toString(sp.getInt("UPDATEMINUTE", 19)));
+        + " " + Integer.toString(sp.getInt("UPDATEMINUTE", 0)));
         Log.i("mylog_main_onStart", sp.getString("FOLDERPATH", "None FOLDERPATH"));
 
         long updateTimestamp = sp.getLong("UPDATETIMESTAMP",0);
@@ -88,22 +92,34 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } else {
-            ListView list = (ListView) findViewById(R.id.list);
+            ListView tlist = (ListView) findViewById(R.id.list);
             TextView tv = (TextView) findViewById(R.id.myempty);
             tv.setText(R.string.nofolder);
-            list.setEmptyView(tv);
+            tlist.setEmptyView(tv);
             DataAdapter adapter = new DataAdapter(this, new String[0]);
-            list.setAdapter(adapter);
+            tlist.setAdapter(adapter);
         }
 
         super.onStart();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater menuInflater = getMenuInflater();
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+    protected void onPause() {
+        state = list.onSaveInstanceState();
+        super.onPause();
+    }
 
+    @Override
+    protected void onResume() {
+        if(state != null) {
+            list.onRestoreInstanceState(state);
+        }
+        super.onResume();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
@@ -198,12 +214,12 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Intent.ACTION_MAIN);
-                        intent.addCategory(Intent.CATEGORY_HOME);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+//                        Intent intent = new Intent(Intent.ACTION_MAIN);
+//                        intent.addCategory(Intent.CATEGORY_HOME);
+//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        startActivity(intent);
                         finish();
-                        System.exit(0); // delete ??
+//                        System.exit(0); // delete ??
                     }
                 })
                 .setNegativeButton("no", null)
@@ -214,8 +230,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 9999 && resultCode == MainActivity.RESULT_OK) {
             try {
+                // can I make it intent instead of sharedpref ???
                 sp.edit().putString("FOLDERPATH",
                         '/' + Objects.requireNonNull(data.getData()).getPath().split(":")[1]).apply();
+//                Log.i("mylog_main", sp.getString("FOLDERPATH", "Nonono"));
             } catch (NullPointerException e) {
                 e.getLocalizedMessage();
             }
@@ -298,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showList(final String[] picsToShow) {
-        ListView list = (ListView) findViewById(R.id.list);
+        list = (ListView) findViewById(R.id.list);
         list.setEmptyView(findViewById(R.id.myempty));
         DataAdapter adapter = new DataAdapter(this, picsToShow);
         list.setAdapter(adapter);
