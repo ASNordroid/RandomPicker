@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.Manifest;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -92,12 +91,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } else {
-            ListView tlist = (ListView) findViewById(R.id.list);
+            ListView tList = (ListView) findViewById(R.id.list);
             TextView tv = (TextView) findViewById(R.id.myempty);
             tv.setText(R.string.nofolder);
-            tlist.setEmptyView(tv);
+            tList.setEmptyView(tv);
             DataAdapter adapter = new DataAdapter(this, new String[0]);
-            tlist.setAdapter(adapter);
+            tList.setAdapter(adapter);
         }
 
         super.onStart();
@@ -343,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] getNewPics(int numberOfPics) {
         try {
-            List<String> allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET", null));
+            List<String> allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET", new HashSet<String>()));
             long seed = System.nanoTime();
             Collections.shuffle(allImagesList, new Random(seed));
 
@@ -351,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (allImagesList.size() < numberOfPics) {
                 setNewRandomListFromFolder();
-                allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET", null));
+                allImagesList = new ArrayList<>(sp.getStringSet("ALLIMAGESSET", new HashSet<String>()));
             }
 
             String[] imageIds = new String[numberOfPics];
